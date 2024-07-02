@@ -34,8 +34,8 @@ class ValueAgent:
     15  16  17  18  19
     20  21  22  23  24
     """
-    def __init__(self):
-        self.discount = 0.95
+    def __init__(self, discount=0.95):
+        self.discount = discount
         self.value_function = None
 
     def visualize_results(self):
@@ -129,7 +129,7 @@ class ValueAgent:
         while not stop or run_count < patience:
             run_count += 1
             stop = self.mean_update_value_function(threshold=threshold)
-        print(f"Iteration count at halt: {run_count}")
+        print(f"Iteration count at halt = {run_count}")
         return self.value_function
 
     def max_update_value_function(self, threshold=0.1):  # todo: is the only difference between value iteration and iterative policy evaluation mean vs max?
@@ -170,7 +170,7 @@ class ValueAgent:
         while not stop or run_count < patience:
             run_count += 1
             stop = self.max_update_value_function(threshold=threshold)
-        print(f"Iteration count at halt: {run_count}")
+        print(f"Iteration count at halt = {run_count}")
         return self.value_function
 
 
@@ -196,6 +196,7 @@ class PolicyAgent:
 
 if __name__ == '__main__':
     agent = ValueAgent()
+
     # agent.explicit()
     # agent.iterative_policy_evaluation()
     agent.value_iteration()
