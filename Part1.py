@@ -176,18 +176,45 @@ class ExplicitAgent:
         # print(f"Max indices: {max_indices}")
         return self.value_function
 
-    def policy_explicit(self):
-        pass
+    def calculate_policy_estimation(self):
+        self.policy_function = []
+        for state_index in range(25):
+            expected_rewards = []
+            for action_index in range(4):
+                if state_index == 1:
+                    expected_rewards.append(5 + self.discount * self.value_function[17])
+                elif state_index == 4:
+                    expected_rewards.append(0.5 * (2.5 + self.discount * self.value_function[17]) +
+                                            0.5 * (2.5 + self.discount * self.value_function[24]))  # todo: check if this should be summed or should it be appended twice? it affects the denominator when calculating the mean of the rewards.
+                elif state_index in [0, 5, 10, 15, 20] and action_index == 2:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                elif state_index in [0, 2, 3] and action_index == 0:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                elif state_index in [9, 14, 19, 24] and action_index == 3:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                elif state_index in [20, 21, 22, 23, 24] and action_index == 1:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                else:
+                    if action_index == 0:
+                        expected_rewards.append(self.discount * self.value_function[state_index - 5])
+                    elif action_index == 1:
+                        expected_rewards.append(self.discount * self.value_function[state_index + 5])
+                    elif action_index == 2:
+                        expected_rewards.append(self.discount * self.value_function[state_index - 1])
+                    else:
+                        expected_rewards.append(self.discount * self.value_function[state_index + 1])
+            self.policy_function.append(np.array(expected_rewards).argmax())
+        return self.policy_function
 # ================================================================================================================
 
 
-class IterativePolicyAgent():
+class IterativePolicyAgent:
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
         self.policy_function = None
 
-    def mean_update_value_function(self, threshold=0.1):
+    def update_value_function(self, threshold=0.1):
         """
         1. initialize the state values randomly.
         2. for every state:
@@ -222,21 +249,21 @@ class IterativePolicyAgent():
                         rewards_accumulated.append(self.discount * self.value_function[state_index - 1])
                     else:
                         rewards_accumulated.append(self.discount * self.value_function[state_index + 1])
-            self.value_function[state_index] = np.array(rewards_accumulated).mean()
+            self.value_function[state_index] = np.array(rewards_accumulated).sum()*0.25
         stop = (np.abs(self.value_function - old_values) < threshold).any()
         return stop
 
-    def value_iterative_policy_evaluation(self,  threshold=0.1, patience=1e5):
+    def calculate_value_function(self, threshold=0.1, patience=1e5):
         self.value_function = np.random.normal(size=25)
         stop = False
         run_count = 0
         while not stop or run_count < patience:
             run_count += 1
-            stop = self.mean_update_value_function(threshold=threshold)
+            stop = self.update_value_function(threshold=threshold)
         print(f"Iteration count at halt = {run_count}")
         return self.value_function
 
-    def policy_iterative_policy_evaluation(self):
+    def calculate_policy_estimation(self):
         """
         Given the optimal state value function is estimated, we can extract the optimal policy from it.
         To do so, for every state, we select the action that maximizes the rewards and discounted future state values.
@@ -279,7 +306,7 @@ class ValueIterationAgent:
         self.discount = discount
         self.value_function = None
 
-    def max_update_value_function(self, threshold=0.1):  # todo: is the only difference between value iteration and iterative policy evaluation mean vs max?
+    def update_value_function(self, threshold=0.1):  # todo: is the only difference between value iteration and iterative policy evaluation sum + action probs vs max?
         old_values = self.value_function.copy()
         for state_index in range(25):
             rewards_accumulated = []
@@ -288,7 +315,7 @@ class ValueIterationAgent:
                     rewards_accumulated.append(5 + self.discount*self.value_function[17])
                 elif state_index == 4:
                     rewards_accumulated.append(0.5*(2.5 + self.discount*self.value_function[17]) +
-                                               0.5*(2.5 + self.discount*self.value_function[24]))  # todo: check if this should be summed or should it be appended twice? it affects the denominator when calculating the mean of the rewards.
+                                               0.5*(2.5 + self.discount*self.value_function[24]))
                 elif state_index in [0, 5, 10, 15, 20] and action_index == 2:
                     rewards_accumulated.append(-0.5 + self.discount*self.value_function[state_index])
                 elif state_index in [0, 2, 3] and action_index == 0:
@@ -310,18 +337,45 @@ class ValueIterationAgent:
         stop = (np.abs(self.value_function - old_values) < threshold).any()
         return stop
 
-    def value_value_iteration(self, threshold=0.1, patience=1e5):  # todo: this returns values much different from the iterative policy evaluation. fix
+    def calculate_value_function(self, threshold=0.1, patience=1e5):  # todo: this returns values much different from the iterative policy evaluation. fix
         self.value_function = np.random.normal(size=25)
         stop = False
         run_count = 0
         while not stop or run_count < patience:
             run_count += 1
-            stop = self.max_update_value_function(threshold=threshold)
+            stop = self.update_value_function(threshold=threshold)
         print(f"Iteration count at halt = {run_count}")
         return self.value_function
 
-    def policy_value_iteration(self):
-        pass
+    def calculate_policy_estimation(self):
+        self.policy_function = []
+        for state_index in range(25):
+            expected_rewards = []
+            for action_index in range(4):
+                if state_index == 1:
+                    expected_rewards.append(5 + self.discount * self.value_function[17])
+                elif state_index == 4:
+                    expected_rewards.append(0.5 * (2.5 + self.discount * self.value_function[17]) +
+                                            0.5 * (2.5 + self.discount * self.value_function[24]))  # todo: check if this should be summed or should it be appended twice? it affects the denominator when calculating the mean of the rewards.
+                elif state_index in [0, 5, 10, 15, 20] and action_index == 2:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                elif state_index in [0, 2, 3] and action_index == 0:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                elif state_index in [9, 14, 19, 24] and action_index == 3:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                elif state_index in [20, 21, 22, 23, 24] and action_index == 1:
+                    expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
+                else:
+                    if action_index == 0:
+                        expected_rewards.append(self.discount * self.value_function[state_index - 5])
+                    elif action_index == 1:
+                        expected_rewards.append(self.discount * self.value_function[state_index + 5])
+                    elif action_index == 2:
+                        expected_rewards.append(self.discount * self.value_function[state_index - 1])
+                    else:
+                        expected_rewards.append(self.discount * self.value_function[state_index + 1])
+            self.policy_function.append(np.array(expected_rewards).argmax())
+        return self.policy_function
 
 
 if __name__ == '__main__':
