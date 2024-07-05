@@ -331,78 +331,91 @@ class OptimizerExplicitAgent:
 # ================================================================================================================
 
 
-class OptimizerPolicyIteration:
+class OptimizerPolicyIteration:  # todo: gets stuck
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
         self.policy = None
 
-    def evaluate_policy(self, threshold=0.01):
-        old_values = self.value_function.copy()
-        for state_index in range(25):
-            if state_index == 1:
-                self.value_function[state_index] = 5 + self.discount * self.value_function[17]
-            elif state_index == 4:
-                self.value_function[state_index](0.5 * (2.5 + self.discount * self.value_function[17]) +
-                                                 0.5 * (2.5 + self.discount * self.value_function[24]))
-            elif self.policy[state_index] == 3:
-                if state_index in [4, 9, 14, 19, 24]:
-                    self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
+    def evaluate_policy(self, threshold=0.1):
+        def eval_states():
+            old_values = self.value_function.copy()
+            for state_index in range(25):
+                if state_index == 1:
+                    self.value_function[state_index] = 5 + self.discount * self.value_function[17]
+                elif state_index == 4:
+                    self.value_function[state_index] = (0.5 * (2.5 + self.discount * self.value_function[17]) +
+                                                        0.5 * (2.5 + self.discount * self.value_function[24]))
+                elif self.policy[state_index] == 3:
+                    if state_index in [4, 9, 14, 19, 24]:
+                        self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
+                    else:
+                        self.value_function[state_index] = self.discount * self.value_function[state_index + 1]
+                elif self.policy[state_index] == 2:
+                    if state_index in [0, 5, 10, 15, 20]:
+                        self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
+                    else:
+                        self.value_function[state_index] = self.discount * self.value_function[state_index - 1]
+                elif self.policy[state_index] == 1:
+                    if state_index in [20, 21, 22, 23, 24]:
+                        self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
+                    else:
+                        self.value_function[state_index] = self.discount * self.value_function[state_index + 5]
                 else:
-                    self.value_function[state_index] = self.discount * self.value_function[state_index + 1]
-            elif self.policy[state_index] == 2:
-                if state_index in [0, 5, 10, 15, 20]:
-                    self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
-                else:
-                    self.value_function[state_index] = self.discount * self.value_function[state_index - 1]
-            elif self.policy[state_index] == 1:
-                if state_index in [20, 21, 22, 23, 24]:
-                    self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
-                else:
-                    self.value_function[state_index] = self.discount * self.value_function[state_index + 5]
-            else:
-                if state_index in [0, 1, 2, 3, 4]:
-                    self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
-                else:
-                    self.value_function[state_index] = self.discount * self.value_function[state_index - 5]
-        stop = (np.abs(self.value_function - old_values) < threshold).any()
-        return stop
+                    if state_index in [0, 1, 2, 3, 4]:
+                        self.value_function[state_index] = -0.5 + self.discount * self.value_function[state_index]
+                    else:
+                        self.value_function[state_index] = self.discount * self.value_function[state_index - 5]
+            stop = (np.abs(self.value_function - old_values) < threshold).any()
+            return stop
+        stop = False
+        run_count = 0
+        patience = 1e5
+        while not stop or run_count < patience:
+            run_count += 1
+            stop = eval_states()
 
     def improve_policy(self):
         for state_index in range(25):
             if state_index == 0:
-                self.policy[state_index] = np.argmax([self.value_function[1], self.value_function[5]])
+                self.policy[state_index] = np.argmax([-np.inf, self.value_function[5], -np.inf, self.value_function[1]])
             elif state_index == 4:
-                self.policy[state_index] = np.argmax([self.value_function[3], self.value_function[9]])
+                self.policy[state_index] = np.argmax([-np.inf, self.value_function[9], self.value_function[3], -np.inf])
             elif state_index == 20:
-                self.policy[state_index] = np.argmax([self.value_function[21], self.value_function[15]])
+                self.policy[state_index] = np.argmax([self.value_function[15], -np.inf, -np.inf, self.value_function[21]])
             elif state_index == 24:
-                self.policy[state_index] = np.argmax([self.value_function[19], self.value_function[23]])
+                self.policy[state_index] = np.argmax([self.value_function[19], -np.inf, self.value_function[23], -np.inf])
             elif state_index in [5, 10, 15]:
-                self.policy[state_index] = np.argmax([self.value_function[state_index + 1],
-                                                      self.value_function[state_index + 5],
-                                                      self.value_function[state_index - 5]])
-            elif state_index in [1, 2, 3]:
-                self.policy[state_index] = np.argmax([self.value_function[state_index + 1],
-                                                      self.value_function[state_index + 5],
-                                                      self.value_function[state_index - 1]])
-            elif state_index in [21, 22, 23]:
-                self.policy[state_index] = np.argmax([self.value_function[state_index - 1],
-                                                      self.value_function[state_index + 1],
-                                                      self.value_function[state_index - 5]])
-            elif state_index in [9, 14, 19]:
-                self.policy[state_index] = np.argmax([self.value_function[state_index - 1],
-                                                      self.value_function[state_index + 5],
-                                                      self.value_function[state_index - 5]])
-            else:
-                self.policy[state_index] = np.argmax([self.value_function[state_index + 1],
-                                                      self.value_function[state_index + 5],
+                self.policy[state_index] = np.argmax([self.value_function[state_index + 5],
                                                       self.value_function[state_index - 5],
-                                                      self.value_function[state_index - 1]])
+                                                      -np.inf,
+                                                      self.value_function[state_index + 1]])
+            elif state_index in [1, 2, 3]:
+                self.policy[state_index] = np.argmax([-np.inf,
+                                                      self.value_function[state_index + 5],
+                                                      self.value_function[state_index - 1],
+                                                      self.value_function[state_index + 1]])
+            elif state_index in [21, 22, 23]:
+                self.policy[state_index] = np.argmax([self.value_function[state_index - 5],
+                                                      -np.inf,
+                                                      self.value_function[state_index - 1],
+                                                      self.value_function[state_index + 1],
+                                                      ])
+            elif state_index in [9, 14, 19]:
+                self.policy[state_index] = np.argmax([self.value_function[state_index + 5],
+                                                      self.value_function[state_index - 5],
+                                                      self.value_function[state_index - 1],
+                                                      -np.inf])
+            else:
+                self.policy[state_index] = np.argmax([self.value_function[state_index - 5],
+                                                      self.value_function[state_index + 5],
+                                                      self.value_function[state_index - 1],
+                                                      self.value_function[state_index + 1]])
         # return policy
 
     def estimate_optimal_policy(self, patience=1e5):
-        self.policy = np.random.randint(low=0, high=4, size=25)
+        self.policy = np.zeros(25)
+        self.value_function = np.ones(25)
         counter = 0
         while True or counter < patience:
             self.evaluate_policy()
@@ -411,6 +424,7 @@ class OptimizerPolicyIteration:
             if (previous_policy == self.policy).all():
                 break
             counter += 1
+        print(f"Counter at termination = {counter}")
         return self.value_function
 
 
@@ -497,6 +511,7 @@ class OptimizerValueIterationAgent:
 
 
 if __name__ == '__main__':
-    agent = EvaluatorExplicitAgent()
-    state_values = agent.evaluate_policy()
-    visualize_results(state_values, title="Equiprobable Policy Evaluation")
+    agent = OptimizerPolicyIteration()
+    state_values = agent.estimate_optimal_policy()
+    print(agent.policy)
+    visualize_results(vector=state_values, title="Iterative Policy Evaluation")
