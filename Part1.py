@@ -386,8 +386,8 @@ class OptimizerPolicyIteration:  # todo: gets stuck
             elif state_index == 24:
                 self.policy[state_index] = np.argmax([self.value_function[19], -np.inf, self.value_function[23], -np.inf])
             elif state_index in [5, 10, 15]:
-                self.policy[state_index] = np.argmax([self.value_function[state_index + 5],
-                                                      self.value_function[state_index - 5],
+                self.policy[state_index] = np.argmax([self.value_function[state_index - 5],
+                                                      self.value_function[state_index + 5],
                                                       -np.inf,
                                                       self.value_function[state_index + 1]])
             elif state_index in [1, 2, 3]:
@@ -402,8 +402,8 @@ class OptimizerPolicyIteration:  # todo: gets stuck
                                                       self.value_function[state_index + 1],
                                                       ])
             elif state_index in [9, 14, 19]:
-                self.policy[state_index] = np.argmax([self.value_function[state_index + 5],
-                                                      self.value_function[state_index - 5],
+                self.policy[state_index] = np.argmax([self.value_function[state_index - 5],
+                                                      self.value_function[state_index + 5],
                                                       self.value_function[state_index - 1],
                                                       -np.inf])
             else:
