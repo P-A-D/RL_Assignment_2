@@ -108,7 +108,7 @@ class EvaluatorIterativePolicyAgent:
                 elif state_index == 4:
                     rewards_accumulated.append(0.5 * (2.5 + self.discount * self.value_function[17]) +
                                                0.5 * (2.5 + self.discount * self.value_function[
-                        24]))  # todo: check if this should be summed or should it be appended twice? it affects the denominator when calculating the mean of the rewards.
+                        24]))
                 elif state_index in [0, 5, 10, 15, 20] and action_index == 2:
                     rewards_accumulated.append(-0.5 + self.discount * self.value_function[state_index])
                 elif state_index in [0, 2, 3] and action_index == 0:
@@ -134,7 +134,7 @@ class EvaluatorIterativePolicyAgent:
         self.value_function = np.random.normal(size=25)
         stop = False
         run_count = 0
-        while not stop or run_count < patience:
+        while not stop and run_count < patience:
             run_count += 1
             stop = self.update_value_function(threshold=threshold)
         print(f"Iteration count at halt = {run_count}")
@@ -158,7 +158,7 @@ class OptimizerExplicitAgent:
         self.discount = discount
         self.value_function = None
 
-    def explicit(self, g=0.95):  # todo: the outputs are different from the other methods. check if this is fine.
+    def explicit(self, g=0.95):
         """
         By manually choosing the best possible action in some of the states, we are left with about 1.5 million
         possible equations due to not knowing which action in each state yields the best values. On those 1.5 million
@@ -306,7 +306,7 @@ class OptimizerExplicitAgent:
                 elif state_index == 4:
                     expected_rewards.append(0.5 * (2.5 + self.discount * self.value_function[17]) +
                                             0.5 * (2.5 + self.discount * self.value_function[
-                        24]))  # todo: check if this should be summed or should it be appended twice? it affects the denominator when calculating the mean of the rewards.
+                        24]))
                 elif state_index in [0, 5, 10, 15, 20] and action_index == 2:
                     expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
                 elif state_index in [0, 2, 3] and action_index == 0:
@@ -331,7 +331,7 @@ class OptimizerExplicitAgent:
 # ================================================================================================================
 
 
-class OptimizerPolicyIteration:  # todo: gets stuck
+class OptimizerPolicyIteration:
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
@@ -371,7 +371,7 @@ class OptimizerPolicyIteration:  # todo: gets stuck
         stop = False
         run_count = 0
         patience = 1e5
-        while not stop or run_count < patience:
+        while not stop and run_count < patience:
             run_count += 1
             stop = eval_states()
 
@@ -417,7 +417,7 @@ class OptimizerPolicyIteration:  # todo: gets stuck
         self.policy = np.zeros(25)
         self.value_function = np.ones(25)
         counter = 0
-        while True or counter < patience:
+        while True and counter < patience:
             self.evaluate_policy()
             previous_policy = self.policy.copy()
             self.improve_policy()
@@ -468,11 +468,11 @@ class OptimizerValueIterationAgent:
         return stop
 
     def calculate_value_function(self, threshold=0.1,
-                                 patience=1e5):  # todo: this returns values much different from the iterative policy evaluation. fix
+                                 patience=1e5):
         self.value_function = np.random.normal(size=25)
         stop = False
         run_count = 0
-        while not stop or run_count < patience:
+        while not stop and run_count < patience:
             run_count += 1
             stop = self.update_value_function(threshold=threshold)
         print(f"Iteration count at halt = {run_count}")
@@ -488,7 +488,7 @@ class OptimizerValueIterationAgent:
                 elif state_index == 4:
                     expected_rewards.append(0.5 * (2.5 + self.discount * self.value_function[17]) +
                                             0.5 * (2.5 + self.discount * self.value_function[
-                        24]))  # todo: check if this should be summed or should it be appended twice? it affects the denominator when calculating the mean of the rewards.
+                        24]))
                 elif state_index in [0, 5, 10, 15, 20] and action_index == 2:
                     expected_rewards.append(-0.5 + self.discount * self.value_function[state_index])
                 elif state_index in [0, 2, 3] and action_index == 0:
