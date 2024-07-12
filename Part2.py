@@ -298,5 +298,5 @@ if __name__ == '__main__':
     # permute on: [3. 1. 2. 3. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0.]
     # permute off:
 
-    # todo: the results of this question all seem wrong. quadruple check with others and prof.
+    # todo: the results of monte carlo methods all seem wrong (sections 1 and 2). quadruple check with others and prof.
 

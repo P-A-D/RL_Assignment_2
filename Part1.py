@@ -141,15 +141,6 @@ class EvaluatorIterativePolicyAgent:
         return self.value_function
 
 
-class EvaluatorValueIterationAgent:  # todo: fix
-    def __init__(self, discount=0.95):
-        self.discount = discount
-        self.value_function = None
-        self.policy_function = None
-
-    # def
-
-
 # ================================================================================================================
 # ============================================== Section 2 =======================================================
 # ================================================================================================================
