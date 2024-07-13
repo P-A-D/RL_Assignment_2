@@ -14,7 +14,6 @@ from scipy.optimize import fsolve
 (section 1): Estimate the value function for each of the states for the given policy
 1. Solve the system of Bellman equations explicitly
 2. Iterative policy evaluation                                  
-3. value iteration
 Which states have the highest value? Does this surprise you?
 
 (section 2):  Determine the optimal policy for the gridworld problem
@@ -33,9 +32,12 @@ Which states have the highest value? Does this surprise you?
 
 
 def visualize_results(vector, title):
+    """
+    This function plots the value functions.
+    """
     plt.figure()
     sns.heatmap(vector.reshape((5, 5)), cmap='coolwarm', annot=True, fmt='.2f', square=True)
-    plt.title(f"{title}")
+    plt.title(f"Question 1 - {title}")
     plt.show()
 
 
@@ -43,6 +45,9 @@ def visualize_results(vector, title):
 # ============================================== Section 1 =======================================================
 # ================================================================================================================
 class EvaluatorExplicitAgent:
+    """
+    This class solves the Bellman Equations explicitly to evaluate the value function of the given policy.
+    """
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
@@ -85,6 +90,9 @@ class EvaluatorExplicitAgent:
 
 
 class EvaluatorIterativePolicyAgent:
+    """
+    This class uses policy iteration to evaluate the value function of the given policy.
+    """
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
@@ -145,6 +153,9 @@ class EvaluatorIterativePolicyAgent:
 # ============================================== Section 2 =======================================================
 # ================================================================================================================
 class OptimizerExplicitAgent:
+    """
+    This class solves the Bellman equations to find the optimal policy for the given problem.
+    """
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
@@ -323,6 +334,9 @@ class OptimizerExplicitAgent:
 
 
 class OptimizerPolicyIteration:
+    """
+    This class uses policy iteration to find the optimal policy for the given problem.
+    """
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
@@ -420,9 +434,10 @@ class OptimizerPolicyIteration:
 
 
 # ================================================================================================================
-
-
 class OptimizerValueIterationAgent:
+    """
+    This class uses value iteration to find the optimal policy for the given problem.
+    """
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
@@ -502,7 +517,8 @@ class OptimizerValueIterationAgent:
 
 
 if __name__ == '__main__':
-    agent = OptimizerPolicyIteration()
-    state_values = agent.estimate_optimal_policy()
-    print(agent.policy)
-    visualize_results(vector=state_values, title="Iterative Policy Evaluation")
+    # agent = OptimizerPolicyIteration()
+    # state_values = agent.estimate_optimal_policy()
+    # print(agent.policy)
+    # visualize_results(vector=state_values, title="Iterative Policy Evaluation")
+    pass

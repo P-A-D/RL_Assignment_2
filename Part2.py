@@ -20,29 +20,29 @@ from scipy.optimize import fsolve
     15  16  17  18  19
     20  21  22  23  24
 """
-
-# todo: the ties were broken consistently in the question 1. maybe change it to arbitrarily for that and implement consistently for this question.
-
-# ================================================================================================================
-# ============================================== Section 1 =======================================================
-# ================================================================================================================
+# =====================================================================================================
 
 
 def visualize_results(vector, title):
+    """
+    Plots the value functions.
+    """
     plt.figure()
     sns.heatmap(vector.reshape((5, 5)), cmap='coolwarm', annot=True, fmt='.2f', square=True)
-    plt.title(f"5x5 Gridworld - {title}")
+    plt.title(f"Question 2 - {title}")
     plt.show()
 
 
 def select_epsilon_action(action, epsilon):
+    """
+    Returns an action to take in an epsilon-greedy policy.
+    """
     return action if np.random.random() < epsilon else np.random.choice(range(4))
 
 
-# =====================================================================================================
 def find_next_state(state, action):
     """
-    returns a pair of (next state, generated reward)
+    returns a pair of (next state, generated reward) given the current state and action.
     """
     if state == 1:
         return 22, 5
@@ -68,7 +68,13 @@ def find_next_state(state, action):
         return (state + 1, -0.2) if (state + 1) % 5 != 0 else (state, -0.5)
 
 
+# ================================================================================================================
+# ============================================== Section 1 =======================================================
+# ================================================================================================================
 class MonteCarloES:
+    """
+    The class for finding the optimal policy using Monte Carlo method with exploring starts.
+    """
     def __init__(self, discount=0.95):
         self.discount = discount
         self.policy = np.random.randint(low=0, high=4, size=25)
@@ -93,20 +99,26 @@ class MonteCarloES:
                     break
                 state_sequence.append(next_state)
                 action_sequence.append(self.policy[next_state])
+
+            # making the pairs
+            pairs = list(zip(state_sequence, action_sequence))
+
             # evaluating Q(s,a)
             g = 0
             for i in range(len(reward_sequence)-1, -1, -1):
                 g = g*discount + reward_sequence[i]
-                self.state_action_visits[state_sequence[i], action_sequence[i]] += 1
-                self.state_action_values[state_sequence[i], action_sequence[i]] += 1/self.state_action_visits[state_sequence[i], action_sequence[i]] * (g - self.state_action_values[state_sequence[i], action_sequence[i]])
-            self.policy = np.argmax(self.state_action_values, axis=1)
-        print(f"The best policy found is {self.policy}")
+                if (state_sequence[i], action_sequence[i]) not in pairs[:i]:
+                    self.state_action_visits[state_sequence[i], action_sequence[i]] += 1
+                    self.state_action_values[state_sequence[i], action_sequence[i]] += 1/self.state_action_visits[state_sequence[i], action_sequence[i]] * (g - self.state_action_values[state_sequence[i], action_sequence[i]])
+                    self.policy[state_sequence[i]] = np.argmax(self.state_action_values[state_sequence[i], :])
+        print(f"The best policy found is:")
+        print(np.array(self.policy).reshape((5, 5)))
 # =====================================================================================================
 
 
 class MonteCarloESoft:
     """
-    e-greedy is a form of e-soft so it has to count
+    The class for finding the optimal policy using Monte Carlo method using epsilon greedy, without exploring starts.
     """
     def __init__(self, discount=0.95):
         self.discount = discount
@@ -122,6 +134,7 @@ class MonteCarloESoft:
             action_sequence = [select_epsilon_action(self.policy[initial_state], epsilon)]
             reward_sequence = []
             steps = 0
+
             # generating a sequence
             while True:
                 steps += 1
@@ -131,20 +144,29 @@ class MonteCarloESoft:
                     break
                 state_sequence.append(next_state)
                 action_sequence.append(select_epsilon_action(self.policy[next_state], epsilon))
+
+            # making the pairs
+            pairs = list(zip(state_sequence, action_sequence))
+
             # evaluating Q(s,a)
             g = 0
             for i in range(len(reward_sequence)-1, -1, -1):
                 g = g*discount + reward_sequence[i]
-                self.state_action_visits[state_sequence[i], action_sequence[i]] += 1
-                self.state_action_values[state_sequence[i], action_sequence[i]] += 1/self.state_action_visits[state_sequence[i], action_sequence[i]] * (g - self.state_action_values[state_sequence[i], action_sequence[i]])
-            self.policy = np.argmax(self.state_action_values, axis=1)
-        print(f"The best policy found is {self.policy}")
+                if (state_sequence[i], action_sequence[i]) not in pairs[:i]:
+                    self.state_action_visits[state_sequence[i], action_sequence[i]] += 1
+                    self.state_action_values[state_sequence[i], action_sequence[i]] += 1/self.state_action_visits[state_sequence[i], action_sequence[i]] * (g - self.state_action_values[state_sequence[i], action_sequence[i]])
+                    self.policy[state_sequence[i]] = np.argmax(self.state_action_values[state_sequence[i], :])
+        print(f"The best policy found is:")
+        print(np.array(self.policy).reshape((5, 5)))
 
 
 # ================================================================================================================
 # ============================================== Section 2 =======================================================
 # ================================================================================================================
 class Behavior:
+    """
+        The class for finding the optimal policy using off policy Monte Carlo method (using behavior policy)
+    """
     def __init__(self):
         self.behavior_policy = lambda _: np.random.choice(range(4))
         self.state_action_values = np.random.normal(size=(25, 4))
@@ -179,7 +201,8 @@ class Behavior:
                 if self.target_policy[state_sequence[i]] != action_sequence[i]:
                     break
                 w /= 0.25
-        print(f"The best policy found is {self.target_policy}")
+        print(f"The best policy found is:")
+        print(np.array(self.target_policy).reshape((5, 5)))
 
 
 # ================================================================================================================
@@ -187,6 +210,9 @@ class Behavior:
 # ================================================================================================================
 
 class PolicyIteration:  # todo: think more about the open-ended part of this question
+    """
+        The class for finding the optimal policy using policy iteration.
+    """
     def __init__(self, discount=0.95, permute=True):
         self.discount = discount
         self.value_function = None
@@ -290,13 +316,14 @@ if __name__ == '__main__':
     # agent = Behavior()
     # agent.learn()
 
-    agent = PolicyIteration(permute=False)
-    agent.estimate_optimal_policy()
-    visualize_results(agent.value_function, "Policy Iteration")
-    print(f"optimal value function = {agent.value_function}")
-    print(f"optimal policy = {agent.policy}")
-    # permute on: [3. 1. 2. 3. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0.]
-    # permute off:
+    # agent = PolicyIteration(permute=False)
+    # agent.estimate_optimal_policy()
+    # visualize_results(agent.value_function, "Policy Iteration")
+    # print(f"optimal value function = {agent.value_function}")
+    # print(f"optimal policy = {agent.policy}")
 
-    # todo: the results of monte carlo methods all seem wrong (sections 1 and 2). quadruple check with others and prof.
+    # todo: check the results of monte carlo methods with others and prof.
+    a = [1, 2, 3, 10, 4, 6]
+    print(a)
+    print(np.array(a).reshape((2, 3)))
 
