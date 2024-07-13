@@ -33,6 +33,14 @@ def visualize_results(vector, title):
     plt.show()
 
 
+def illustrate(policy):
+    decode = {0: '  Up ', 1: 'Down ', 2: 'Left ', 3: 'Right'}
+    policy = [decode[i] for i in policy]
+    print("The best policy found:")
+    for i in range(5):
+        print(policy[i*5:i*5+5])
+
+
 def select_epsilon_action(action, epsilon):
     """
     Returns an action to take in an epsilon-greedy policy.
@@ -111,8 +119,7 @@ class MonteCarloES:
                     self.state_action_visits[state_sequence[i], action_sequence[i]] += 1
                     self.state_action_values[state_sequence[i], action_sequence[i]] += 1/self.state_action_visits[state_sequence[i], action_sequence[i]] * (g - self.state_action_values[state_sequence[i], action_sequence[i]])
                     self.policy[state_sequence[i]] = np.argmax(self.state_action_values[state_sequence[i], :])
-        print(f"The best policy found is:")
-        print(np.array(self.policy).reshape((5, 5)))
+        illustrate(self.policy)
 # =====================================================================================================
 
 
@@ -156,8 +163,7 @@ class MonteCarloESoft:
                     self.state_action_visits[state_sequence[i], action_sequence[i]] += 1
                     self.state_action_values[state_sequence[i], action_sequence[i]] += 1/self.state_action_visits[state_sequence[i], action_sequence[i]] * (g - self.state_action_values[state_sequence[i], action_sequence[i]])
                     self.policy[state_sequence[i]] = np.argmax(self.state_action_values[state_sequence[i], :])
-        print(f"The best policy found is:")
-        print(np.array(self.policy).reshape((5, 5)))
+        illustrate(self.policy)
 
 
 # ================================================================================================================
@@ -201,8 +207,7 @@ class Behavior:
                 if self.target_policy[state_sequence[i]] != action_sequence[i]:
                     break
                 w /= 0.25
-        print(f"The best policy found is:")
-        print(np.array(self.target_policy).reshape((5, 5)))
+        illustrate(self.target_policy)
 
 
 # ================================================================================================================
@@ -302,6 +307,7 @@ class PolicyIteration:  # todo: think more about the open-ended part of this que
                 break
             counter += 1
         print(f"Counter at termination = {counter}")
+        illustrate(self.policy)
         return self.value_function
 
 

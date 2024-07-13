@@ -41,6 +41,14 @@ def visualize_results(vector, title):
     plt.show()
 
 
+def illustrate(policy):
+    decode = {0:'  Up ', 1:'Down ', 2:'Left ', 3:'Right'}
+    policy = [decode[i] for i in policy]
+    print("The best policy found:")
+    for i in range(5):
+        print(policy[i*5:i*5+5])
+
+
 # ================================================================================================================
 # ============================================== Section 1 =======================================================
 # ================================================================================================================
@@ -159,6 +167,7 @@ class OptimizerExplicitAgent:
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
+        self.policy_function = []
 
     def explicit(self, g=0.95):
         """
@@ -327,6 +336,7 @@ class OptimizerExplicitAgent:
                     else:
                         expected_rewards.append(self.discount * self.value_function[state_index + 1])
             self.policy_function.append(np.array(expected_rewards).argmax())
+        illustrate(self.policy_function)
         return self.policy_function
 
 
@@ -430,6 +440,7 @@ class OptimizerPolicyIteration:
                 break
             counter += 1
         print(f"Counter at termination = {counter}")
+        illustrate(self.policy)
         return self.value_function
 
 
@@ -441,6 +452,7 @@ class OptimizerValueIterationAgent:
     def __init__(self, discount=0.95):
         self.discount = discount
         self.value_function = None
+        self.policy_function = []
 
     def update_value_function(self, threshold=0.1):
         old_values = self.value_function.copy()
@@ -513,6 +525,7 @@ class OptimizerValueIterationAgent:
                     else:
                         expected_rewards.append(self.discount * self.value_function[state_index + 1])
             self.policy_function.append(np.array(expected_rewards).argmax())
+        illustrate(self.policy_function)
         return self.policy_function
 
 
