@@ -214,7 +214,7 @@ class Behavior:
 # ============================================== Section 3 =======================================================
 # ================================================================================================================
 
-class PolicyIteration:  # todo: think more about the open-ended part of this question
+class PolicyIteration:
     """
         The class for finding the optimal policy using policy iteration.
     """
@@ -328,7 +328,6 @@ if __name__ == '__main__':
     # print(f"optimal value function = {agent.value_function}")
     # print(f"optimal policy = {agent.policy}")
 
-    # todo: check the results of monte carlo methods with others and prof.
     a = [1, 2, 3, 10, 4, 6]
     print(a)
     print(np.array(a).reshape((2, 3)))
